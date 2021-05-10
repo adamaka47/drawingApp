@@ -24,86 +24,134 @@
 	<script>
 
 
-		onRes()
 
-		window.addEventListener('resize', onRes)
+		const canvas = document.getElementById('canvas')
+		const ctx = canvas.getContext('2d')
 
+		let size = 20
 
-		function onRes() {
-			const canvas = document.getElementById('canvas')
-			if (screen.availWidth < 500) {
+		if (screen.availWidth < 500) {
+			const lastCoords = new Object() // сюда будем записывать наши координаты, у которых св-во - идентификатор тапа
 
-
-
-				canvas.width = 100
-				canvas.height = 100
-
-				chechH1()
-				const ctx = canvas.getContext('2d')
-
-				const lastCoords = new Object() // сюда будем записывать наши координаты, у которых св-во - идентификатор тапа
-
-				canvas.addEventListener('touchstart', e => {
-					for (const touchEl of e.changedTouches) {
-						lastCoords[touchEl.identifier] = {x: touchEl.pageX, y: touchEl.pageY}
-					}
-
-				})
-
-				canvas.addEventListener('touchmove', e => {
-
-					for (const touchEl of e.changedTouches) {
-
-						ctx.beginPath()
-
-						ctx.moveTo(lastCoords[touchEl.identifier].x, lastCoords[touchEl.identifier].y)
-						ctx.lineTo(touchEl.pageX, touchEl.pageY)
-
-						const color = parseInt(Math.random() * 0xffffff).toString(16)
-
-
-						ctx.strokeStyle = '#' + color
-
-						ctx.stroke()
-
-						lastCoords[touchEl.identifier] = {x: touchEl.pageX, y: touchEl.pageY}
-					}
-				})
-
-				function onCancel() {
-					for (const touchEl of e.changedTouches) {
-						delete lastCoords[touchEl.identifier]
-					}
+			canvas.addEventListener('touchstart', e => {
+				for (const touchEl of e.changedTouches) {
+					lastCoords[touchEl.identifier] = {x: touchEl.pageX, y: touchEl.pageY}
 				}
 
-					function onResize() {
+			})
 
-						if (screen.availWidth < 500) {
-							canvas.width = window.innerWidth
-							canvas.height = window.innerHeight
+			canvas.addEventListener('touchmove', e => {
 
-							return
-						}
-					}
+				for (const touchEl of e.changedTouches) {
+
+					ctx.beginPath()
+
+					ctx.moveTo(lastCoords[touchEl.identifier].x, lastCoords[touchEl.identifier].y)
+					ctx.lineTo(touchEl.pageX, touchEl.pageY)
+
+					const color = parseInt(Math.random() * 0xffffff).toString(16)
 
 
-				window.addEventListener('load', onResize)
-				window.addEventListener('resize', onResize)
-			} else {
-				canvas.width = 0
-				canvas.height = 0
-				chechH1()
-				const h1 = document.createElement('h1')
-				h1.textContent = 'Поддерживаются только мобильные приложения'
-				document.body.prepend(h1)
+					ctx.strokeStyle = '#' + color
+
+					ctx.stroke()
+
+					lastCoords[touchEl.identifier] = {x: touchEl.pageX, y: touchEl.pageY}
+				}
+			})
+
+			function onCancel(e) {
+				for (const touchEl of e.changedTouches) {
+					delete lastCoords[touchEl.identifier]
+				}
 			}
+
+
+			canvas.addEventListener('touchend', onCancel)
+			canvas.addEventListener('touchcancel', onCancel)
+		} else {
+
+			let isRuty = false
+			let x = 'hz', y = 'hz'
+
+			// можно добавить size и тд.
+
+
+			function drawLine(x1, y1, x2, y2) {
+
+				ctx.beginPath()
+
+				ctx.moveTo(x1, y1)
+				ctx.lineTo(x2, y2)
+
+				const color = parseInt(Math.random() * 0xffffff).toString(16) // неполностью работает правильно из-за возможности неполноты цвета по типу #12345, можно спокойной заменить функцией
+
+				ctx.strokeStyle = '#' + color
+
+				ctx.lineWidth = 40
+
+				ctx.stroke()
+
+			}
+
+
+			function drawCircle(x, y) {
+
+				ctx.beginPath()
+				ctx.arc(x, y, size, 0, 2 * Math.PI)
+
+				const color = parseInt(Math.random() * 0xffffff).toString(16) // неполностью работает правильно из-за возможности неполноты цвета по типу #12345, можно спокойной заменить функцией
+
+				ctx.fillStyle = '#' + color
+
+				ctx.fill()
+
+			}
+
+
+			canvas.addEventListener('mousedown', e => {
+				isRuty = true
+			})
+
+			canvas.addEventListener('mouseup', e => {
+
+				x = 'hz'
+				y = 'hz'
+
+				isRuty = false
+			})
+
+			canvas.addEventListener('mousemove', e => {
+
+				const x2 = e.offsetX
+				const y2 = e.offsetY
+
+				if (!isRuty) {
+					return
+				}
+
+				drawCircle(x2, y2)
+
+
+				drawLine(x, y, x2, y2)
+
+				x = x2
+				y = y2	
+
+			})
+
 		}
 
-		function chechH1() {
-			if (document.querySelector('h1')) {
-				document.querySelector('h1').remove()
-			}
+		window.addEventListener('load', onResize)
+		window.addEventListener('resize', onResize)
+
+		function onResize() {
+
+			canvas.width = window.innerWidth
+			canvas.height = window.innerHeight
+
 		}
+
 
 
 	</script>
